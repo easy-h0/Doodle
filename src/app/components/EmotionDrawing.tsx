@@ -1,9 +1,10 @@
 import svgPaths from "../../imports/svg-5haz31rudk";
 import svgPathsTimeline from "../../imports/svg-xrj4tg1unl";
 import imgGeminiGeneratedImage2A8Kog2A8Kog2A8K2 from "../../assets/787c6e7e15be880eb00917540163584fade607ec.png";
-import { ArrowLeft, Download, Undo2, Redo2, Trash2, Save, Palette, Brush, Wrench, Clock, Send, X, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Download, Undo2, Redo2, Trash2, Save, Palette, Brush, Wrench, Clock, Send, X, ChevronDown, ChevronUp, Menu } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useIsMobile } from "./ui/use-mobile";
 
 const BRUSH_SIZES = [2, 4, 8, 14];
 const COLORS = [
@@ -172,32 +173,38 @@ interface ToolbarProps {
   onClear: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  isMobile?: boolean;
+  onMenuToggle?: () => void;
 }
 
-function Toolbar({ onUndo, onRedo, onClear, canUndo, canRedo }: ToolbarProps) {
+function Toolbar({ onUndo, onRedo, onClear, canUndo, canRedo, isMobile, onMenuToggle }: ToolbarProps) {
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      <div className="flex items-center gap-2">
+    <div className="h-12 sm:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {isMobile && (
+          <button onClick={onMenuToggle} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <Menu className="size-5 text-gray-600" />
+          </button>
+        )}
         <button onClick={onUndo} disabled={!canUndo} className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30">
           <Undo2 className="size-5 text-gray-600" />
         </button>
         <button onClick={onRedo} disabled={!canRedo} className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30">
           <Redo2 className="size-5 text-gray-600" />
         </button>
-        <div className="w-px h-6 bg-gray-200 mx-2" />
+        <div className="w-px h-6 bg-gray-200 mx-1 sm:mx-2" />
         <button onClick={onClear} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <Trash2 className="size-5 text-gray-600" />
         </button>
       </div>
 
       <div className="text-center">
-        <h2 className="font-['Pretendard'] font-medium text-lg text-gray-900">
+        <h2 className="font-['Pretendard'] font-medium text-base sm:text-lg text-gray-900">
           낙서하기
         </h2>
-
       </div>
 
-      <div className="w-[120px]" /> {/* Spacer for center alignment */}
+      <div className="w-[60px] sm:w-[120px]" />
     </div>
   );
 }
@@ -335,7 +342,7 @@ function DoodleResultCard({ canvasImage, aiMessage, onClose }: DoodleResultCardP
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-white rounded-[20px] shadow-[0px_3px_19px_rgba(0,0,0,0.08),0px_3px_17px_rgba(0,0,0,0.03)] border border-[#eaecef] overflow-hidden w-[385px] max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-[20px] shadow-[0px_3px_19px_rgba(0,0,0,0.08),0px_3px_17px_rgba(0,0,0,0.03)] border border-[#eaecef] overflow-hidden w-[calc(100%-32px)] sm:w-[385px] max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <CardContent canvasImage={canvasImage} title={title} question={question} chips={chips} intensity={intensity} />
@@ -392,9 +399,10 @@ interface MainCanvasProps {
   color: string;
   isEraser: boolean;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  isMobile?: boolean;
 }
 
-function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle, chatMessages, onSendMessage, brushSize, color, isEraser, canvasRef }: MainCanvasProps) {
+function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle, chatMessages, onSendMessage, brushSize, color, isEraser, canvasRef, isMobile }: MainCanvasProps) {
   const isDrawingRef = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
 
@@ -470,22 +478,22 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
   };
 
   return (
-    <div className="flex-1 bg-[#f8f9fa] flex items-center justify-center p-8">
+    <div className="flex-1 bg-[#f8f9fa] flex items-center justify-center p-2 sm:p-8">
       <div className="relative bg-white rounded-2xl shadow-lg w-full h-full max-w-[1200px] overflow-hidden">
         {/* Corner decorations */}
-        <div className="absolute border-[#d1d5dc] border-l-2 border-solid border-t-2 left-4 rounded-tl-[10px] size-[16px] top-4 z-20 pointer-events-none" />
-        <div className="absolute border-[#d1d5dc] border-r-2 border-solid border-t-2 right-4 rounded-tr-[10px] size-[16px] top-4 z-20 pointer-events-none" />
-        <div className="absolute border-[#d1d5dc] border-b-2 border-l-2 border-solid left-4 rounded-bl-[10px] size-[16px] bottom-4 z-20 pointer-events-none" />
-        <div className="absolute border-[#d1d5dc] border-b-2 border-r-2 border-solid right-4 rounded-br-[10px] size-[16px] bottom-4 z-20 pointer-events-none" />
+        <div className="absolute border-[#d1d5dc] border-l-2 border-solid border-t-2 left-2 sm:left-4 rounded-tl-[10px] size-3 sm:size-[16px] top-2 sm:top-4 z-20 pointer-events-none" />
+        <div className="absolute border-[#d1d5dc] border-r-2 border-solid border-t-2 right-2 sm:right-4 rounded-tr-[10px] size-3 sm:size-[16px] top-2 sm:top-4 z-20 pointer-events-none" />
+        <div className="absolute border-[#d1d5dc] border-b-2 border-l-2 border-solid left-2 sm:left-4 rounded-bl-[10px] size-3 sm:size-[16px] bottom-2 sm:bottom-4 z-20 pointer-events-none" />
+        <div className="absolute border-[#d1d5dc] border-b-2 border-r-2 border-solid right-2 sm:right-4 rounded-br-[10px] size-3 sm:size-[16px] bottom-2 sm:bottom-4 z-20 pointer-events-none" />
 
         {/* AI Real-time Response / Chat */}
         <motion.div
           animate={{
-            width: isChatOpen ? 360 : 'auto',
+            width: isChatOpen ? (isMobile ? 'calc(100% - 16px)' : 360) : 'auto',
             boxShadow: isAiTyping ? '0 0 12px 4px rgba(101,194,251,0.25)' : '0 0 8px 0px rgba(101,194,251,0.1)',
           }}
           transition={{ width: { type: 'spring', damping: 30, stiffness: 200 }, boxShadow: { duration: 1.5, ease: 'easeOut' } }}
-          className="absolute left-1/2 -translate-x-1/2 top-8 bg-white/95 backdrop-blur-sm border border-[#65C2FB] rounded-2xl z-30 overflow-hidden"
+          className="absolute left-1/2 -translate-x-1/2 top-4 sm:top-8 bg-white/95 backdrop-blur-sm border border-[#65C2FB] rounded-2xl z-30 overflow-hidden max-w-[calc(100%-16px)] sm:max-w-none"
         >
           {/* Header - Always Visible */}
           <motion.button
@@ -534,7 +542,7 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
                 className="border-t border-gray-100"
               >
                 {/* Chat Messages */}
-                <div className="h-[280px] overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-white/50 to-gray-50/50">
+                <div className="h-[200px] sm:h-[280px] overflow-y-auto p-3 sm:p-4 space-y-3 bg-gradient-to-b from-white/50 to-gray-50/50">
                   {chatMessages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <motion.div
@@ -643,9 +651,9 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
         </motion.div>
 
         {/* Bottom right guide text */}
-        <div className="absolute bottom-8 right-8 bg-[rgba(255,255,255,0.9)] border border-[#e5e7eb] rounded-[10px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] px-4 py-2 z-20 pointer-events-none">
-          <p className="font-['Noto_Sans_KR'] text-[12px] text-[#6a7282] whitespace-nowrap">
-            드래그하여 그리기 • 지우개는 왼쪽에서 선택
+        <div className="absolute bottom-3 right-3 sm:bottom-8 sm:right-8 bg-[rgba(255,255,255,0.9)] border border-[#e5e7eb] rounded-[10px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] px-2 py-1.5 sm:px-4 sm:py-2 z-20 pointer-events-none">
+          <p className="font-['Noto_Sans_KR'] text-[10px] sm:text-[12px] text-[#6a7282] whitespace-nowrap">
+            {isMobile ? '드래그하여 그리기' : '드래그하여 그리기 • 지우개는 왼쪽에서 선택'}
           </p>
         </div>
 
@@ -655,7 +663,7 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
             {/* Background character illustration */}
             {!hasDrawn && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-500">
-                <div className="relative w-[600px] h-[500px]">
+                <div className="relative w-[300px] h-[250px] sm:w-[600px] sm:h-[500px]">
                   <img
                     alt=""
                     className="absolute inset-0 max-w-none object-cover pointer-events-none size-full opacity-20"
@@ -686,6 +694,7 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
 }
 
 export default function EmotionDrawing() {
+  const isMobile = useIsMobile();
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [canvasImage, setCanvasImage] = useState('');
@@ -698,6 +707,7 @@ export default function EmotionDrawing() {
   const [isEraser, setIsEraser] = useState(false);
   const [undoStack, setUndoStack] = useState<ImageData[]>([]);
   const [redoStack, setRedoStack] = useState<ImageData[]>([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const saveToUndoStack = useCallback(() => {
@@ -951,19 +961,30 @@ export default function EmotionDrawing() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <Toolbar onUndo={handleUndo} onRedo={handleRedo} onClear={handleClear} canUndo={undoStack.length > 0} canRedo={redoStack.length > 0} />
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar
-          brushSize={brushSize}
-          onBrushSizeChange={setBrushSize}
-          color={color}
-          onColorChange={setColor}
-          isEraser={isEraser}
-          onEraserToggle={() => setIsEraser(prev => !prev)}
-          onSave={handleSave}
-          onDownload={handleDownload}
-        />
+    <div className="h-dvh flex flex-col bg-gray-50">
+      <Toolbar
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        onClear={handleClear}
+        canUndo={undoStack.length > 0}
+        canRedo={redoStack.length > 0}
+        isMobile={isMobile}
+        onMenuToggle={() => setIsMobileMenuOpen(prev => !prev)}
+      />
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <Sidebar
+            brushSize={brushSize}
+            onBrushSizeChange={setBrushSize}
+            color={color}
+            onColorChange={setColor}
+            isEraser={isEraser}
+            onEraserToggle={() => setIsEraser(prev => !prev)}
+            onSave={handleSave}
+            onDownload={handleDownload}
+          />
+        )}
         <MainCanvas
           aiMessage={aiMessage}
           isAiTyping={isAiTyping}
@@ -976,8 +997,88 @@ export default function EmotionDrawing() {
           color={color}
           isEraser={isEraser}
           canvasRef={canvasRef}
+          isMobile={isMobile}
         />
       </div>
+
+      {/* Mobile Sidebar Drawer */}
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/30"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed left-0 top-0 bottom-0 z-50 w-72"
+            >
+              <Sidebar
+                brushSize={brushSize}
+                onBrushSizeChange={setBrushSize}
+                color={color}
+                onColorChange={setColor}
+                isEraser={isEraser}
+                onEraserToggle={() => setIsEraser(prev => !prev)}
+                onSave={() => { handleSave(); setIsMobileMenuOpen(false); }}
+                onDownload={() => { handleDownload(); setIsMobileMenuOpen(false); }}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Toolbar */}
+      {isMobile && (
+        <div className="bg-white border-t border-gray-200 px-3 py-2 flex flex-col gap-2">
+          {/* Row 1: Brush sizes + Colors + Eraser */}
+          <div className="flex items-center justify-center gap-1.5">
+            {BRUSH_SIZES.map((size, i) => (
+              <button
+                key={size}
+                onClick={() => { setBrushSize(size); if (isEraser) setIsEraser(false); }}
+                className={`size-7 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${brushSize === size && !isEraser ? 'border-[#65C2FB]' : 'border-gray-300'}`}
+              >
+                <div className={`${['size-1', 'size-1.5', 'size-2.5', 'size-3.5'][i]} rounded-full bg-gray-900`} />
+              </button>
+            ))}
+            <div className="w-px h-6 bg-gray-200 mx-1.5 flex-shrink-0" />
+            {COLORS.slice(0, 4).map((c) => (
+              <button
+                key={c}
+                onClick={() => { setColor(c); if (isEraser) setIsEraser(false); }}
+                className={`size-7 rounded-full flex-shrink-0 transition-transform ${color === c && !isEraser ? 'ring-2 ring-offset-1 scale-110' : ''}`}
+                style={{ backgroundColor: c, ringColor: c }}
+              />
+            ))}
+            <div className="w-px h-6 bg-gray-200 mx-1.5 flex-shrink-0" />
+            <button
+              onClick={() => setIsEraser(prev => !prev)}
+              className={`p-1.5 rounded-lg flex-shrink-0 ${isEraser ? 'bg-[#E6F5FF] border border-[#65C2FB]' : 'hover:bg-gray-100'}`}
+            >
+              <svg className="size-5" fill="none" viewBox="0 0 21.7 20.2414">
+                <path d={svgPaths.p1c565ac0} stroke={isEraser ? '#65C2FB' : '#6b7280'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+              </svg>
+            </button>
+          </div>
+          {/* Row 2: Actions */}
+          <div className="flex items-center gap-2">
+            <button onClick={handleSave} className="flex-1 py-2 bg-[#65C2FB] hover:bg-[#4DB3F5] text-white rounded-lg font-['Pretendard'] font-medium text-sm transition-colors">
+              낙서완료
+            </button>
+            <button onClick={handleDownload} className="py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1.5">
+              <Download className="size-4 text-gray-600" />
+              <span className="font-['Pretendard'] text-sm text-gray-600">저장</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Result Card Popup */}
       <AnimatePresence>
@@ -989,7 +1090,6 @@ export default function EmotionDrawing() {
           />
         )}
       </AnimatePresence>
-
 
       {/* Onboarding Overlay */}
       <AnimatePresence>
