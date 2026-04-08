@@ -419,9 +419,11 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
       tempCanvas.height = canvas.height;
       tempCanvas.getContext('2d')!.drawImage(canvas, 0, 0);
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      ctx.drawImage(tempCanvas, 0, 0);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, rect.width, rect.height);
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
