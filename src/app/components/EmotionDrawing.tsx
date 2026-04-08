@@ -419,11 +419,9 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
       tempCanvas.height = canvas.height;
       tempCanvas.getContext('2d')!.drawImage(canvas, 0, 0);
       const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, rect.width, rect.height);
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      ctx.drawImage(tempCanvas, 0, 0);
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -433,10 +431,18 @@ function MainCanvas({ aiMessage, isAiTyping, onDrawing, isChatOpen, onChatToggle
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     if ('touches' in e) {
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY,
+      };
     }
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
   };
 
   const drawLine = (from: {x: number, y: number}, to: {x: number, y: number}) => {
